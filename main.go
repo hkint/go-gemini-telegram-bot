@@ -5,6 +5,9 @@ import (
 	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+
+	"go-gemini-telegram-bot/app"
+
 	"github.com/joho/godotenv"
 )
 
@@ -20,7 +23,7 @@ func LoadConfig() Config {
 		log.Println("No .env file found, trying to load from environment")
 	}
 
-	config = Config{
+	config := Config{
 		BotToken:       getEnv("BOT_TOKEN", ""),
 		Gemini_API_KEY: getEnv("Gemini_API_KEY", ""),
 	}
@@ -44,7 +47,6 @@ func main() {
 	log.Println("Starting bot")
 	config = LoadConfig()
 	log.Println("Loaded config")
-	log.Println(config)
 
 	start_bot()
 }
@@ -66,10 +68,21 @@ func start_bot() {
 
 	for update := range updates {
 		if update.Message != nil {
-			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+			if update.Message.IsCommand() {
+				switch update.Message.Command() {
+				case "start":
+					app.StartCommand(update, bot)
+				case "new":
+					app.NewChatCommand(update, bot)
+				default:
+					app.DefaultCommand(update, bot)
+				}
+			} else if update.Message.Text != "" {
+				app.HandleText(update, bot)
+			} else if update.Message.Photo != nil {
+				app.HandlePhoto(update, bot)
+			}
 
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "I received your message")
-			bot.Send(msg)
 		}
 
 	}
