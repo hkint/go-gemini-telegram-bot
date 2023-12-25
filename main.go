@@ -6,5 +6,4 @@ import (
 
 func main() {
 	app.Start_bot()
-	app.CloseClient()
 }

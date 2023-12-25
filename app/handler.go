@@ -26,10 +26,16 @@ func setChatSession(chatID int64, chatSession *genai.ChatSession) {
 	ChatSessionMap.Store(chatID, chatSession)
 }
 
-func startNewChatSession(model *genai.GenerativeModel, chatID int64) *genai.ChatSession {
-	chatSession := model.StartChat()
-	setChatSession(chatID, chatSession)
-	return chatSession
+func handleChatSession(model *genai.GenerativeModel, chatID int64) (cs *genai.ChatSession) {
+	if session := getChatSession(chatID); session == nil {
+		log.Printf("No chat session found, creating new one\n")
+		cs = model.StartChat()
+		setChatSession(chatID, cs)
+	} else {
+		log.Printf("Chat session found, continue using it\n")
+		cs = getChatSession(chatID)
+	}
+	return
 }
 
 func handleDefaultCommand(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
@@ -68,15 +74,6 @@ func handleNewCommand(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 func handleTextMessage(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	chatID := update.Message.Chat.ID
 
-	var cs *genai.ChatSession
-	if session := getChatSession(chatID); session == nil {
-		log.Printf("No chat session found, creating new one\n")
-		cs = startNewChatSession(textModel, chatID)
-	} else {
-		log.Printf("Chat session found, using it\n")
-		cs = getChatSession(chatID)
-	}
-
 	// Send "Generating..." message to user.
 	msg := tgbotapi.NewMessage(chatID, "Waiting...")
 	msg.ReplyToMessageID = update.Message.MessageID
@@ -93,6 +90,7 @@ func handleTextMessage(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	response := "..."
 
 	// Generate a response by Gemini
+	cs := handleChatSession(textModel, chatID)
 	ctx := context.Background()
 	iter := cs.SendMessageStream(ctx, genai.Text(text))
 	handleResponse(iter, &response)
@@ -111,7 +109,7 @@ func handleTextMessage(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 }
 
 func handlePhotoMessage(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	// Implement your image message handling logic here
+
 }
 
 func handleResponse(iter *genai.GenerateContentResponseIterator, response *string) {
