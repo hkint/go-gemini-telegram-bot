@@ -5,5 +5,7 @@ import (
 )
 
 func main() {
+	client := app.InitModels()
+	defer client.Close()
 	app.Start_bot()
 }

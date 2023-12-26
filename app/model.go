@@ -10,30 +10,48 @@ import (
 	"go-gemini-telegram-bot/config"
 )
 
+const (
+	TEXT_MODEL   = "gemini-pro"
+	VISION_MODEL = "gemini-pro-vision"
+)
+
 var (
 	client      *genai.Client
 	textModel   *genai.GenerativeModel
 	visionModel *genai.GenerativeModel
 )
 
-func init() {
+func InitModels() *genai.Client {
 	initClient()
 	log.Println("Initialized client")
 
 	SafetySettings := []*genai.SafetySetting{
+		{
+			Category:  genai.HarmCategoryHarassment,
+			Threshold: genai.HarmBlockNone,
+		},
+		{
+			Category:  genai.HarmCategoryHateSpeech,
+			Threshold: genai.HarmBlockNone,
+		},
+		{
+			Category:  genai.HarmCategorySexuallyExplicit,
+			Threshold: genai.HarmBlockNone,
+		},
 		{
 			Category:  genai.HarmCategoryDangerousContent,
 			Threshold: genai.HarmBlockNone,
 		},
 	}
 
-	textModel = client.GenerativeModel("gemini-pro")
+	textModel = client.GenerativeModel(TEXT_MODEL)
 	textModel.SafetySettings = SafetySettings
 
-	visionModel = client.GenerativeModel("gemini-pro-vision")
+	visionModel = client.GenerativeModel(VISION_MODEL)
 	visionModel.SafetySettings = SafetySettings
 
 	log.Println("Initialized models")
+	return client
 }
 
 func initClient() {
@@ -45,11 +63,5 @@ func initClient() {
 	client, err = genai.NewClient(ctx, option.WithAPIKey(config.Env.Gemini_API_KEY))
 	if err != nil {
 		log.Fatal(err)
-	}
-}
-
-func CloseClient() {
-	if client != nil {
-		client.Close()
 	}
 }
