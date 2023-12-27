@@ -1,2 +1,70 @@
 # go-gemini-telegram-bot
-A Telegram Bot based on Google Gemini Free API
+
+**A [Golang](https://golang.org/dl/) Telegram bot powered by Google's free `Gemini` LLM API**
+
+## Overview
+
+This Telegram bot uses Google's Gemini API to provide an AI assistant experience via Telegram. It is written in Golang.
+
+## Features
+
+- Chat with an AI assistant (powered by Gemini) in Telegram
+- Restrict bot access to allowed users
+- Docker support
+
+## Requirements
+
+- Google Gemini API key  
+  Use your Google account to [create your API key](https://makersuite.google.com/app/apikey).
+- Telegram bot token  
+  Create a bot from Telegram [@BotFather](https://t.me/BotFather) and obtain an access token.
+- Golang (version 1.20 or higher) environment
+
+## Configuration
+
+The bot is configured via environment variables or a `.env` file:
+
+```
+BOT_TOKEN = your_telegram_bot_token  
+GEMINI_API_KEY = your_google_gemini_key
+ALLOWED_USERS = username1,username2 # Optional, restrict bot access
+```
+
+See [.env.example](.env.example) for an example. Just copy or rename it to `.env`
+
+## Building and Running
+
+### Native
+
+1. Install Go dependencies
+
+   ```shell
+   go mod tidy
+   ```
+
+2. Set environment variables (or use `.env` file, you can copy it from `.env_example`)
+    ```shell
+    export BOT_TOKEN='your_telegram_bot_token
+    export GEMINI_API_KEY='your_google_gemini_key'
+    ```
+3. Run the bot
+
+   ```shell
+   go run main.go
+   ```
+
+### Docker
+- are available on GitHub Container Registry:
+   ```
+   docker pull ghcr.io/ihkeep/go-gemini-telegram-bot:latest
+   ```
+- use docker-compose
+   ```shell
+   docker-compose up -d
+   ```
+  See [docker-compose.yml](docker-compose.yml) for details.
+
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

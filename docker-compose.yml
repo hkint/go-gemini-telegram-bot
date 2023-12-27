@@ -7,19 +7,6 @@ services:
     environment:
       TZ: Asia/Shanghai
       BOT_TOKEN: 
-      Gemini_API_KEY: 
-
-
-
-  # -------------------------------------------------
-  # go-gemini-telegram-bot:
-  #   image: ghcr.io/ihkeep/go-gemini-telegram-bot:latest
-  #   container_name: go-gemini-telegram-bot
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   restart: always
-  #   environment:
-  #     TZ: Asia/Shanghai
-  #     BOT_TOKEN: 
-  #     Gemini_API_KEY: 
+      GEMINI_API_KEY:
+      # Optional, if you want to only allow certain users to access the bot
+      ALLOWED_USERS:

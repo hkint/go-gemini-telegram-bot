@@ -1,9 +1,9 @@
 package config
 
 import (
-	"os"
-
 	"log"
+	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -11,8 +11,9 @@ import (
 var Env Environment
 
 type Environment struct {
-	BotToken       string
-	Gemini_API_KEY string
+	BotToken     string
+	GeminiApiKey string
+	AllowedUsers []string
 }
 
 func loadEnv() {
@@ -20,15 +21,22 @@ func loadEnv() {
 		log.Println("No .env file found, trying to load from environment")
 	}
 
+	allowedUsersVar := getEnv("ALLOWED_USERS", "")
+	var allowedUsers []string
+	if allowedUsersVar != "" {
+		allowedUsers = strings.Split(allowedUsersVar, ",")
+	}
+
 	Env = Environment{
-		BotToken:       getEnv("BOT_TOKEN", ""),
-		Gemini_API_KEY: getEnv("Gemini_API_KEY", ""),
+		BotToken:     getEnv("BOT_TOKEN", ""),
+		GeminiApiKey: getEnv("GEMINI_API_KEY", ""),
+		AllowedUsers: allowedUsers,
 	}
 
 	if Env.BotToken == "" {
 		log.Fatal("TELEGRAM_BOT_TOKEN must be set in environment variables or .env file")
 	}
-	if Env.Gemini_API_KEY == "" {
+	if Env.GeminiApiKey == "" {
 		log.Fatal("GEMINI_API_KEY must be set in environment variables or .env file")
 	}
 }
@@ -43,5 +51,5 @@ func getEnv(key, defaultValue string) string {
 
 func init() {
 	loadEnv()
-	log.Println("Loaded env")
+	log.Printf("Loaded env: %+v\n", Env)
 }
