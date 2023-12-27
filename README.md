@@ -18,7 +18,7 @@ This Telegram bot uses Google's Gemini API to provide an AI assistant experience
   Use your Google account to [create your API key](https://makersuite.google.com/app/apikey).
 - Telegram bot token  
   Create a bot from Telegram [@BotFather](https://t.me/BotFather) and obtain an access token.
-- Golang (version 1.20 or higher) environment
+- Golang environment (version 1.20 or higher)
 
 ## Configuration
 
@@ -44,7 +44,7 @@ See [.env.example](.env.example) for an example. Just copy or rename it to `.env
 
 2. Set environment variables (or use `.env` file, you can copy it from `.env_example`)
     ```shell
-    export BOT_TOKEN='your_telegram_bot_token
+    export BOT_TOKEN='your_telegram_bot_token'
     export GEMINI_API_KEY='your_google_gemini_key'
     ```
 3. Run the bot
