@@ -8,5 +8,4 @@ services:
       TZ: Asia/Shanghai
       BOT_TOKEN: 
       GEMINI_API_KEY:
-      # Optional, if you want to only allow certain users to access the bot
-      ALLOWED_USERS:
+      ALLOWED_USERS:  # Optional, if you want to only allow certain users to access the bot
