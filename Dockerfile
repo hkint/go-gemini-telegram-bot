@@ -1,12 +1,12 @@
 FROM --platform=$BUILDPLATFORM golang:alpine AS builder
-WORKDIR /app
+WORKDIR /build
 
 COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . ./
 
-RUN go build -ldflags="-s -w" -v -o bot main.go
+RUN go build -ldflags="-s -w" -v -o gemini-bot
 
 
 FROM --platform=$BUILDPLATFORM alpine
@@ -14,8 +14,8 @@ WORKDIR /app
 
 RUN apk add --no-cache tzdata
 
-COPY --from=builder /app/bot .
+COPY --from=builder /build/gemini-bot .
 
 ENV TZ="Asia/Shanghai"
 
-ENTRYPOINT ["./bot"]
+CMD ["./gemini-bot"]

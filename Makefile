@@ -8,7 +8,7 @@ GOTEST=$(GOCMD) test
 GORUN=$(GOCMD) run
 
 # Binary name
-BINARY_NAME=tg_gemini_bot
+BINARY_NAME=gemini-bot
 
 # Build the project
 build:
