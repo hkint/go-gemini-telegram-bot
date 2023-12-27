@@ -51,5 +51,5 @@ func getEnv(key, defaultValue string) string {
 
 func init() {
 	loadEnv()
-	log.Printf("Loaded env: %+v\n", Env)
+	log.Printf("Loaded env")
 }
