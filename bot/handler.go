@@ -155,7 +155,7 @@ func generateResponse(bot *tgbotapi.BotAPI, chatID int64, initMsgID int, modelNa
 	response := getModelResponse(chatID, modelName, parts)
 
 	// Send the response back to the user.
-	sendMessageInMarkdownV2(chatID, initMsgID, response, bot)
+	sendMessageInMarkdown(chatID, initMsgID, response, bot)
 
 	time.Sleep(200 * time.Millisecond)
 }
@@ -168,18 +168,17 @@ func sendMessage(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig) {
 	}
 }
 
-func sendMessageInMarkdownV2(chatID int64, initMsgID int, response string, bot *tgbotapi.BotAPI) {
+func sendMessageInMarkdown(chatID int64, initMsgID int, response string, bot *tgbotapi.BotAPI) {
 	edit := tgbotapi.NewEditMessageText(chatID, initMsgID, response)
 	edit.ParseMode = tgbotapi.ModeMarkdownV2
 	edit.DisableWebPagePreview = true
 	_, sendErr := bot.Send(edit)
 	if sendErr != nil {
 		log.Printf("Error sending message in ModeMarkdownV2: %v\n", sendErr)
-		edit.Text = tgbotapi.EscapeText(tgbotapi.ModeHTML, response)
-		edit.ParseMode = tgbotapi.ModeHTML
+		edit.ParseMode = tgbotapi.ModeMarkdown
 		_, sendErr = bot.Send(edit)
 		if sendErr != nil {
-			log.Printf("Error sending message in ModeHTML: %v\n", sendErr)
+			log.Printf("Error sending message in ModeMarkdown: %v\n", sendErr)
 			edit.ParseMode = ""
 			_, sendErr = bot.Send(edit)
 			if sendErr != nil {
