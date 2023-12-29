@@ -11,13 +11,13 @@ import (
 )
 
 func handleDefaultCommand(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Invalid command. Try /start to get tips")
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Invalid command. Send /help to get help info")
 	sendMessage(bot, msg)
 }
 
 func handleStartCommand(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	user := update.Message.From
-	startText := "Hi! " + user.FirstName + ", Welcome to Gemini Bot! Send some text or image to start the conversation."
+	startText := "Hi! " + user.FirstName + ", Welcome to Gemini Bot! Send /help to get help info"
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, startText)
 	sendMessage(bot, msg)
 }
@@ -40,7 +40,7 @@ func handleClearCommand(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 func handleHelpCommand(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	helpInfo := `Commands: 
-    /clear - Clear previous contents
+    /clear - Clear chat session
     /help - Get help info
 Just send text or image to get response`
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, helpInfo)
@@ -105,7 +105,7 @@ func handlePhotoPrompts(update tgbotapi.Update, bot *tgbotapi.BotAPI, prompts *[
 
 	textPrompts := update.Message.Caption
 	if textPrompts == "" {
-		textPrompts = "Analyse these images and tell me what you see in Chinese"
+		textPrompts = "Analyse the image and Describe it in Chinese"
 	}
 	*prompts = append(*prompts, genai.Text(textPrompts))
 	return false
@@ -151,15 +151,6 @@ func getImageType(data []byte) string {
 	return imageType
 }
 
-func generateResponse(bot *tgbotapi.BotAPI, chatID int64, initMsgID int, modelName string, parts ...genai.Part) {
-	response := getModelResponse(chatID, modelName, parts)
-
-	// Send the response back to the user.
-	sendMessageInMarkdown(chatID, initMsgID, response, bot)
-
-	time.Sleep(200 * time.Millisecond)
-}
-
 func sendMessage(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig) {
 	_, err := bot.Send(msg)
 	if err != nil {
@@ -168,22 +159,36 @@ func sendMessage(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig) {
 	}
 }
 
-func sendMessageInMarkdown(chatID int64, initMsgID int, response string, bot *tgbotapi.BotAPI) {
-	edit := tgbotapi.NewEditMessageText(chatID, initMsgID, response)
+func generateResponse(bot *tgbotapi.BotAPI, chatID int64, initMsgID int, modelName string, parts ...genai.Part) {
+	response := getModelResponse(chatID, modelName, parts)
+
+	// Send the response back to the user.
+	edit := tgbotapi.NewEditMessageText(chatID, initMsgID, toMarkdown(response))
 	edit.ParseMode = tgbotapi.ModeMarkdownV2
 	edit.DisableWebPagePreview = true
+	sendMessageWithRetry(bot, edit, tgbotapi.ModeMarkdownV2)
+
+	time.Sleep(200 * time.Millisecond)
+}
+
+func sendMessageWithRetry(bot *tgbotapi.BotAPI, edit tgbotapi.EditMessageTextConfig, parseMode string) {
 	_, sendErr := bot.Send(edit)
 	if sendErr != nil {
-		log.Printf("Error sending message in ModeMarkdownV2: %v\n", sendErr)
-		edit.ParseMode = tgbotapi.ModeMarkdown
-		_, sendErr = bot.Send(edit)
-		if sendErr != nil {
-			log.Printf("Error sending message in ModeMarkdown: %v\n", sendErr)
-			edit.ParseMode = ""
-			_, sendErr = bot.Send(edit)
-			if sendErr != nil {
-				log.Printf("Error sending message in ModeDefault: %v\n", sendErr)
-			}
+		log.Printf("Error sending message in %s: %v\n", parseMode, sendErr)
+		if parseMode == tgbotapi.ModeMarkdownV2 {
+			sendMessageWithRetry(bot, edit, tgbotapi.ModeHTML)
+		} else if parseMode == tgbotapi.ModeHTML {
+			sendMessageWithRetry(bot, edit, "")
 		}
 	}
+}
+
+func toMarkdown(text string) string {
+	// Replace bullet points with Markdown bullet points
+	text = strings.ReplaceAll(text, "•", "  *")
+
+	// Indent the text
+	text = "> " + strings.Join(strings.Split(text, "\n"), "\n> ")
+
+	return text
 }

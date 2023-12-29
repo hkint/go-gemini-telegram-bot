@@ -44,6 +44,9 @@ func InitModels() *genai.Client {
 	}
 	log.Println("Initialized client")
 
+	textModel = client.GenerativeModel(TextModel)
+	visionModel = client.GenerativeModel(VisionModel)
+
 	SafetySettings := []*genai.SafetySetting{
 		{
 			Category:  genai.HarmCategoryHarassment,
@@ -62,10 +65,6 @@ func InitModels() *genai.Client {
 			Threshold: genai.HarmBlockNone,
 		},
 	}
-
-	textModel = client.GenerativeModel(TextModel)
-	visionModel = client.GenerativeModel(VisionModel)
-
 	textModel.SafetySettings = SafetySettings
 	visionModel.SafetySettings = SafetySettings
 
@@ -87,11 +86,15 @@ func setChatSession(chatSessionID string, chatSession *genai.ChatSession) {
 	chatSessionMap.Store(chatSessionID, chatSession)
 }
 
-func handleChatSession(model *genai.GenerativeModel, chatSessionID string) (cs *genai.ChatSession) {
+func handleChatSession(modelName string, chatSessionID string) (cs *genai.ChatSession) {
 	if session := getChatSession(chatSessionID); session == nil {
 		log.Printf("No chat session found, creating new one\n")
-		cs = model.StartChat()
-		setChatSession(chatSessionID, cs)
+		cs = modelMap[modelName].StartChat()
+		// Note: the vision model 'gemini-pro-vision' is not optimized for multi-turn chat.
+		// Only set the chat session if the model is 'gemini-pro'
+		if modelName == TextModel {
+			setChatSession(chatSessionID, cs)
+		}
 	} else {
 		log.Printf("Chat session found, continue using it\n")
 		cs = session
@@ -114,7 +117,7 @@ func clearChatSession(sessionID string) bool {
 
 func getModelResponse(chatID int64, modelName string, parts []genai.Part) (response string) {
 	sessionID := generateSessionID(chatID, modelName)
-	cs := handleChatSession(modelMap[modelName], sessionID)
+	cs := handleChatSession(modelName, sessionID)
 
 	iter := cs.SendMessageStream(ctx, parts...)
 
@@ -123,7 +126,7 @@ func getModelResponse(chatID int64, modelName string, parts []genai.Part) (respo
 }
 
 func handleResponse(iter *genai.GenerateContentResponseIterator, response *string) {
-	var buffer []string
+	var buffer strings.Builder
 	for {
 		resp, err := iter.Next()
 		if errors.Is(err, iterator.Done) {
@@ -134,16 +137,17 @@ func handleResponse(iter *genai.GenerateContentResponseIterator, response *strin
 			break
 		}
 		if resp != nil && len(resp.Candidates) > 0 {
+			// default only one candidate
 			firstCandidate := resp.Candidates[0]
 			if firstCandidate.Content != nil && len(firstCandidate.Content.Parts) > 0 {
 				part := fmt.Sprint(firstCandidate.Content.Parts[0])
-				buffer = append(buffer, part)
+				buffer.WriteString(part)
 			} else {
-				buffer = append(buffer, firstCandidate.FinishReason.String())
+				buffer.WriteString(resp.PromptFeedback.BlockReason.String() + "--" + firstCandidate.FinishReason.String())
 			}
 		} else {
-			buffer = append(buffer, "no content")
+			buffer.WriteString("no response")
 		}
 	}
-	*response = strings.Join(buffer, "")
+	*response = buffer.String()
 }
