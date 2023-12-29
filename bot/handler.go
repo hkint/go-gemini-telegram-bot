@@ -163,7 +163,7 @@ func generateResponse(bot *tgbotapi.BotAPI, chatID int64, initMsgID int, modelNa
 	response := getModelResponse(chatID, modelName, parts)
 
 	// Send the response back to the user.
-	edit := tgbotapi.NewEditMessageText(chatID, initMsgID, toMarkdown(response))
+	edit := tgbotapi.NewEditMessageText(chatID, initMsgID, response)
 	edit.ParseMode = tgbotapi.ModeMarkdownV2
 	edit.DisableWebPagePreview = true
 	sendMessageWithRetry(bot, edit, tgbotapi.ModeMarkdownV2)
@@ -176,19 +176,9 @@ func sendMessageWithRetry(bot *tgbotapi.BotAPI, edit tgbotapi.EditMessageTextCon
 	if sendErr != nil {
 		log.Printf("Error sending message in %s: %v\n", parseMode, sendErr)
 		if parseMode == tgbotapi.ModeMarkdownV2 {
-			sendMessageWithRetry(bot, edit, tgbotapi.ModeHTML)
-		} else if parseMode == tgbotapi.ModeHTML {
+			log.Printf("Retrying in plain text\n")
+			edit.ParseMode = ""
 			sendMessageWithRetry(bot, edit, "")
 		}
 	}
-}
-
-func toMarkdown(text string) string {
-	// Replace bullet points with Markdown bullet points
-	text = strings.ReplaceAll(text, "•", "  *")
-
-	// Indent the text
-	text = "> " + strings.Join(strings.Split(text, "\n"), "\n> ")
-
-	return text
 }

@@ -8,7 +8,6 @@ import (
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"log"
-	"strings"
 	"sync"
 
 	"github.com/google/generative-ai-go/genai"
@@ -121,12 +120,16 @@ func getModelResponse(chatID int64, modelName string, parts []genai.Part) (respo
 
 	iter := cs.SendMessageStream(ctx, parts...)
 
-	handleResponse(iter, &response)
+	channel := make(chan string)
+	go outputResponse(iter, channel)
+
+	for s := range channel {
+		response += s
+	}
 	return
 }
 
-func handleResponse(iter *genai.GenerateContentResponseIterator, response *string) {
-	var buffer strings.Builder
+func outputResponse(iter *genai.GenerateContentResponseIterator, output chan string) {
 	for {
 		resp, err := iter.Next()
 		if errors.Is(err, iterator.Done) {
@@ -134,20 +137,20 @@ func handleResponse(iter *genai.GenerateContentResponseIterator, response *strin
 		}
 		if err != nil {
 			log.Println(err.Error())
+			output <- err.Error()
 			break
 		}
 		if resp != nil && len(resp.Candidates) > 0 {
-			// default only one candidate
 			firstCandidate := resp.Candidates[0]
 			if firstCandidate.Content != nil && len(firstCandidate.Content.Parts) > 0 {
 				part := fmt.Sprint(firstCandidate.Content.Parts[0])
-				buffer.WriteString(part)
+				output <- part
 			} else {
-				buffer.WriteString(resp.PromptFeedback.BlockReason.String() + "--" + firstCandidate.FinishReason.String())
+				output <- "no content in response"
 			}
 		} else {
-			buffer.WriteString("no response")
+			output <- "response is empty"
 		}
 	}
-	*response = buffer.String()
+	close(output)
 }
