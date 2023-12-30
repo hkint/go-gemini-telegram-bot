@@ -8,8 +8,10 @@ This Telegram bot uses Google's Gemini API to provide an AI assistant experience
 
 ## Features
 
-- Chat with an AI assistant (powered by Gemini) in Telegram
-- Restrict bot access to allowed users
+- Chat with an AI assistant (powered by `Google Gemini`) on Telegram
+- Support both `gemini-pro` and `gemini-pro-vision` models  
+  (The `gemini-pro-vision` model is not optimized for multi-turn conversations)
+- Restrict bot access to authorized users
 
 
 ## Configuration
@@ -43,7 +45,7 @@ See [.env.example](.env.example) for an example. Just copy or rename it to `.env
    ```shell
    docker-compose up -d
    ```
-  See [docker-compose.yml](docker-compose.yml) for details.
+  See [compose.yaml](compose.yaml) for details.
 
 ### Native
 

@@ -1,6 +1,6 @@
 # Project
 README.md
 LICENSE
-docker-compose.yml
+compose.yaml
 .gitignore
 .env*

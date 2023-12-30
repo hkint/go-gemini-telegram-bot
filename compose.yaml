@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  go-gemini-telegram-bot:
+    image: ghcr.io/ihkeep/go-gemini-telegram-pkg:latest
+    container_name: go-gemini-telegram-pkg
+    restart: always
+    environment:
+      TZ: Asia/Shanghai
+      BOT_TOKEN: 
+      GEMINI_API_KEY:
+      ALLOWED_USERS:  # Optional, if you want to only allow certain users to access the pkg
