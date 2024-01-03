@@ -81,6 +81,10 @@ func getChatSession(chatSessionID string) *genai.ChatSession {
 	return nil
 }
 
+func generateSessionID(chatID int64, modelName string) string {
+	return fmt.Sprintf("%d-%s", chatID, modelName)
+}
+
 func setChatSession(chatSessionID string, chatSession *genai.ChatSession) {
 	chatSessionMap.Store(chatSessionID, chatSession)
 }
@@ -99,10 +103,6 @@ func handleChatSession(modelName string, chatSessionID string) (cs *genai.ChatSe
 		cs = session
 	}
 	return
-}
-
-func generateSessionID(chatID int64, modelName string) string {
-	return fmt.Sprintf("%d-%s", chatID, modelName)
 }
 
 func clearChatSession(sessionID string) bool {

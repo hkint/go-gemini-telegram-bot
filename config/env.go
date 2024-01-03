@@ -14,6 +14,7 @@ type Environment struct {
 	BotToken     string
 	GeminiApiKey string
 	AllowedUsers []string
+	DebugFlag    bool
 }
 
 func loadEnv() {
@@ -31,6 +32,7 @@ func loadEnv() {
 		BotToken:     getEnv("BOT_TOKEN", ""),
 		GeminiApiKey: getEnv("GEMINI_API_KEY", ""),
 		AllowedUsers: allowedUsers,
+		DebugFlag:    getEnv("BOT_DEBUG_MODE", "false") == "true",
 	}
 
 	if Env.BotToken == "" {

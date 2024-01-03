@@ -9,3 +9,4 @@ services:
       BOT_TOKEN: 
       GEMINI_API_KEY:
       ALLOWED_USERS:  # Optional, if you want to only allow certain users to access the pkg
+      BOT_DEBUG_MODE: true

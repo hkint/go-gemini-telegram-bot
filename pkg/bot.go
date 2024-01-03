@@ -20,7 +20,7 @@ func StartBot() {
 		log.Panic(err)
 	}
 
-	bot.Debug = true
+	bot.Debug = config.Env.DebugFlag
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
@@ -49,7 +49,7 @@ func StartBot() {
 		// If set AllowedUsers, check if the user is allowed
 		if len(config.Env.AllowedUsers) > 0 {
 			if !contains(config.Env.AllowedUsers, update.Message.From.UserName) {
-				log.Printf("User %s is not allowed to use this bot", update.Message.From.UserName)
+				log.Printf("User [ %s ] is not allowed to use this bot", update.Message.From.UserName)
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "You are not allowed to use this bot")
 				_, _ = bot.Send(msg)
 				continue

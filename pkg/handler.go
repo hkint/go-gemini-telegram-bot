@@ -25,12 +25,9 @@ func handleStartCommand(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 func handleClearCommand(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	chatID := update.Message.Chat.ID
 	textSessionID := generateSessionID(chatID, TextModel)
-	visionSessionID := generateSessionID(chatID, VisionModel)
 
 	info := "no chat session found, just send text or image"
-	textClear, visionClear := clearChatSession(textSessionID), clearChatSession(visionSessionID)
-
-	if textClear || visionClear {
+	if ok := clearChatSession(textSessionID); ok {
 		info = `Chat session cleared.`
 	}
 
