@@ -39,7 +39,7 @@ See [.env.example](.env.example) for an example. Just copy or rename it to `.env
 ### Docker
 - Pre-built images are available on GitHub Container Registry:
    ```
-   docker pull ghcr.io/ihkeep/go-gemini-telegram-bot:latest
+   docker pull ghcr.io/hkint/go-gemini-telegram-bot:latest
    ```
 - Use Docker-Compose
    ```shell
