@@ -7,7 +7,7 @@ require github.com/joho/godotenv v1.5.1
 require (
 	cloud.google.com/go v0.113.0 // indirect
 	cloud.google.com/go/ai v0.5.0 // indirect
-	cloud.google.com/go/auth v0.4.0 // indirect
+	cloud.google.com/go/auth v0.4.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.2 // indirect
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	cloud.google.com/go/longrunning v0.5.7 // indirect
@@ -42,5 +42,5 @@ require (
 require (
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/google/generative-ai-go v0.12.0
-	google.golang.org/api v0.178.0
+	google.golang.org/api v0.180.0
 )
